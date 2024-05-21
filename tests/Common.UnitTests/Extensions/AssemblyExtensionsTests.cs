@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using BridgingIT.DevKit.Common;
+using Iced.Intel;
 
 public class AssemblyExtensionsTests
 {
@@ -42,25 +43,31 @@ public class AssemblyExtensionsTests
     }
 
     [Fact]
-    public void SafeGetTypes_AssembliesInterfaceIsNull_ThrowsException()
+    public void SafeGetTypes_AssembliesInterfaceIsNull_ReturnsEmpty()
     {
         // Arrange
         IEnumerable<Assembly> assemblies = new List<Assembly> { Substitute.For<Assembly>() };
         Type @interface = null;
 
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => assemblies.SafeGetTypes(@interface));
+        // Act
+        var result = assemblies.SafeGetTypes(@interface);
+
+        // Assert
+        result.ShouldBeEmpty();
     }
 
     [Fact]
-    public void SafeGetTypes_AssemblyInterfaceIsNull_ThrowsException()
+    public void SafeGetTypes_AssemblyInterfaceIsNull_ReturnsEmpty()
     {
         // Arrange
         var assembly = Substitute.For<Assembly>();
         Type @interface = null;
 
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => assembly.SafeGetTypes(@interface));
+        // Act
+        var result = assembly.SafeGetTypes(@interface);
+
+        // Assert
+        result.ShouldBeEmpty();
     }
 
     [Fact]

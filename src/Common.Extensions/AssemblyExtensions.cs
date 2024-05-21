@@ -13,7 +13,7 @@ public static class AssemblyExtensions
 {
     public static IEnumerable<Type> SafeGetTypes(this IEnumerable<Assembly> assemblies)
     {
-        if (assemblies == null)
+        if (assemblies is null)
         {
             return[];
         }
@@ -23,7 +23,7 @@ public static class AssemblyExtensions
 
     public static IEnumerable<Type> SafeGetTypes(this Assembly assembly)
     {
-        if (assembly == null)
+        if (assembly is null)
         {
             return[];
         }
@@ -40,23 +40,17 @@ public static class AssemblyExtensions
 
     public static IEnumerable<Type> SafeGetTypes<TInterface>(this IEnumerable<Assembly> assemblies)
     {
-        EnsureArg.IsTrue(typeof(TInterface).IsInterface);
-
         return SafeGetTypes(assemblies, typeof(TInterface));
     }
 
     public static IEnumerable<Type> SafeGetTypes<TInterface>(this Assembly assembly)
     {
-        EnsureArg.IsTrue(typeof(TInterface).IsInterface);
-
         return SafeGetTypes(assembly, typeof(TInterface));
     }
 
     public static IEnumerable<Type> SafeGetTypes(this IEnumerable<Assembly> assemblies, Type @interface)
     {
-        EnsureArg.IsTrue(@interface?.IsInterface == true);
-
-        if (assemblies == null)
+        if (assemblies is null || @interface is null)
         {
             return[];
         }
@@ -66,9 +60,7 @@ public static class AssemblyExtensions
 
     public static IEnumerable<Type> SafeGetTypes(this Assembly assembly, Type @interface)
     {
-        EnsureArg.IsTrue(@interface?.IsInterface == true);
-
-        if (assembly == null)
+        if (assembly is null || @interface is null)
         {
             return[];
         }

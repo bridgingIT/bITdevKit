@@ -50,6 +50,7 @@ builder.Services.AddCaching(builder.Configuration)
     //.UseAzureTableDocumentStoreProvider()
     //.UseCosmosDocumentStoreProvider()
     .WithInMemoryProvider();
+builder.Services.AddApiEndpoints();
 
 builder.Services.AddCommands()
     .WithBehavior(typeof(ModuleScopeCommandBehavior<,>))
@@ -149,6 +150,7 @@ if (builder.Configuration["Metrics:Prometheus:Enabled"].To<bool>())
 app.MapModules();
 app.MapRazorPages();
 app.MapControllers();
+app.MapApiEndpoints();
 app.MapHealthChecks();
 app.MapFallbackToFile("index.html");
 app.MapHub<NotificationHub>("/notificationhub");
