@@ -11,6 +11,16 @@ using System.Reflection;
 
 public static class AssemblyExtensions
 {
+    public static IEnumerable<Type> SafeGetTypes(this IEnumerable<Assembly> assemblies)
+    {
+        if (assemblies == null)
+        {
+            return[];
+        }
+
+        return assemblies.SelectMany(SafeGetTypes);
+    }
+
     public static IEnumerable<Type> SafeGetTypes(this Assembly assembly)
     {
         if (assembly == null)
@@ -28,8 +38,36 @@ public static class AssemblyExtensions
         }
     }
 
+    public static IEnumerable<Type> SafeGetTypes<TInterface>(this IEnumerable<Assembly> assemblies)
+    {
+        EnsureArg.IsTrue(typeof(TInterface).IsInterface);
+
+        return SafeGetTypes(assemblies, typeof(TInterface));
+    }
+
+    public static IEnumerable<Type> SafeGetTypes<TInterface>(this Assembly assembly)
+    {
+        EnsureArg.IsTrue(typeof(TInterface).IsInterface);
+
+        return SafeGetTypes(assembly, typeof(TInterface));
+    }
+
+    public static IEnumerable<Type> SafeGetTypes(this IEnumerable<Assembly> assemblies, Type @interface)
+    {
+        EnsureArg.IsTrue(@interface?.IsInterface == true);
+
+        if (assemblies == null)
+        {
+            return[];
+        }
+
+        return assemblies.SelectMany(t => SafeGetTypes(t, @interface));
+    }
+
     public static IEnumerable<Type> SafeGetTypes(this Assembly assembly, Type @interface)
     {
+        EnsureArg.IsTrue(@interface?.IsInterface == true);
+
         if (assembly == null)
         {
             return[];
@@ -43,25 +81,5 @@ public static class AssemblyExtensions
         {
             return e.Types.Where(t => t != null && t.ImplementsInterface(@interface));
         }
-    }
-
-    public static IEnumerable<Type> SafeGetTypes(this IEnumerable<Assembly> assemblies)
-    {
-        if (assemblies == null)
-        {
-            return[];
-        }
-
-        return assemblies.SelectMany(t => SafeGetTypes(t));
-    }
-
-    public static IEnumerable<Type> SafeGetTypes(this IEnumerable<Assembly> assemblies, Type @interface)
-    {
-        if (assemblies == null)
-        {
-            return[];
-        }
-
-        return assemblies.SelectMany(t => SafeGetTypes(t, @interface));
     }
 }

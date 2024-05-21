@@ -56,6 +56,7 @@ builder.Services.AddCaching(builder.Configuration)
     //.WithAzureTableDocumentStoreProvider()
     //.WithCosmosDocumentStoreProvider()
     .WithInMemoryProvider();
+builder.Services.AddApiEndpoints();
 
 builder.Services.AddCommands()
     .WithBehavior(typeof(ModuleScopeCommandBehavior<,>))
@@ -173,6 +174,7 @@ if (builder.Configuration["Metrics:Prometheus:Enabled"].To<bool>())
 app.MapModules();
 app.MapRazorPages();
 app.MapControllers();
+app.MapApiEndpoints();
 app.MapHealthChecks();
 app.MapFallbackToFile("index.html");
 app.MapHub<SignalRHub>("/signalrhub");
