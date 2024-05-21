@@ -13,6 +13,8 @@ using Serilog;
 
 public static partial class ServiceCollectionExtensions
 {
+    private const string LogKey = "REQ";
+
     public static IServiceCollection AddApiEndpoints(
         this IServiceCollection services)
     {
@@ -61,7 +63,7 @@ public static partial class ServiceCollectionExtensions
 
                 foreach (var serviceDescriptor in serviceDescriptors)
                 {
-                    Log.Logger.Information("{LogKey} api endpoints added (type={ApiEndpointsType})", "REQ", serviceDescriptor.ImplementationType.Name);
+                    Log.Logger.Information("{LogKey} api endpoints added (type={ApiEndpointsType})", LogKey, serviceDescriptor.ImplementationType.Name);
                 }
             }
         }
