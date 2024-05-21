@@ -6,7 +6,6 @@
 namespace Microsoft.Extensions.DependencyInjection;
 
 using System.Reflection;
-using AutoMapper.Internal;
 using BridgingIT.DevKit.Common;
 using BridgingIT.DevKit.Presentation.Web;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -21,13 +20,13 @@ public static partial class ServiceCollectionExtensions
 
         return services.AddApiEndpoints(
             BridgingIT.DevKit.Common.AssemblyExtensions
-                .SafeGetTypes<IApiEndpoint>(AppDomain.CurrentDomain.GetAssemblies())
+                .SafeGetTypes<IApiEndpoints>(AppDomain.CurrentDomain.GetAssemblies())
                     .Select(t => t.Assembly).Distinct());
     }
 
     public static IServiceCollection AddApiEndpoints<T>(
         this IServiceCollection services)
-        where T : IApiEndpoint
+        where T : IApiEndpoints
     {
         EnsureArg.IsNotNull(services, nameof(services));
 
@@ -51,8 +50,9 @@ public static partial class ServiceCollectionExtensions
 
         foreach (var assembly in assemblies.SafeNull())
         {
-            var serviceDescriptors = assembly.SafeGetTypes<IApiEndpoint>()
-                .Select(type => ServiceDescriptor.Transient(typeof(IApiEndpoint), type))
+            var serviceDescriptors = assembly.SafeGetTypes<IApiEndpoints>()
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .Select(t => ServiceDescriptor.Transient(typeof(IApiEndpoints), t))
                 .ToArray();
 
             if (serviceDescriptors.SafeAny())

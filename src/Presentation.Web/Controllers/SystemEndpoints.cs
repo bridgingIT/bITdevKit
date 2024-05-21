@@ -18,9 +18,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
-public class SystemEndpoints : IApiEndpoint
+public class SystemEndpoints : ApiEndpointsBase
 {
-    public void MapApiEndpoints(IEndpointRouteBuilder app)
+    public override void Map(IEndpointRouteBuilder app)
     {
         app.MapGet("/api/_system/echo", async (IMediator mediator) =>
         {

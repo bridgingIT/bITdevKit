@@ -18,12 +18,14 @@ public static class ApplicationApplicationExtensions
     {
         EnsureArg.IsNotNull(app, nameof(app));
 
-        var endpoints = app.Services.GetService<IEnumerable<IApiEndpoint>>();
+        var endpoints = app.Services.GetService<IEnumerable<IApiEndpoints>>();
         IEndpointRouteBuilder builder = routeGroupBuilder is null ? app : routeGroupBuilder;
 
-        foreach (var endpoint in endpoints.SafeNull())
+        foreach (var endpoint in endpoints.SafeNull()
+            .Where(e => e.Enabled && !e.IsRegistered))
         {
-            endpoint.MapApiEndpoints(builder);
+            endpoint.Map(builder);
+            endpoint.IsRegistered = true;
         }
 
         return app;
