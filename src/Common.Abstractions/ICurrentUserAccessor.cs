@@ -5,7 +5,7 @@
 
 namespace BridgingIT.DevKit.Common;
 
-public interface ICurrentUserService
+public interface ICurrentUserAccessor
 {
     public string UserId { get; }
 
