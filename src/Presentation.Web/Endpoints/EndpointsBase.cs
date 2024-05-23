@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Routing;
 
-public abstract class ApiEndpointsBase : IApiEndpoints
+public abstract class EndpointsBase : IEndpoints
 {
     public bool Enabled { get; set; } = true;
 

@@ -56,7 +56,6 @@ builder.Services.AddCaching(builder.Configuration)
     //.WithAzureTableDocumentStoreProvider()
     //.WithCosmosDocumentStoreProvider()
     .WithInMemoryProvider();
-builder.Services.AddApiEndpoints();
 
 builder.Services.AddCommands()
     .WithBehavior(typeof(ModuleScopeCommandBehavior<,>))
@@ -111,6 +110,7 @@ builder.Services.AddProblemDetails(o => Configure.ProblemDetails(o, true));
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 
+builder.Services.AddEndpoints<SystemEndpoints>(builder.Environment.IsDevelopment());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(ConfigureOpenApiDocument); // TODO: still needed when all OpenAPI specifications are available in swagger UI?
 
@@ -174,7 +174,7 @@ if (builder.Configuration["Metrics:Prometheus:Enabled"].To<bool>())
 app.MapModules();
 app.MapRazorPages();
 app.MapControllers();
-app.MapApiEndpoints();
+app.MapEndpoints();
 app.MapHealthChecks();
 app.MapFallbackToFile("index.html");
 app.MapHub<SignalRHub>("/signalrhub");

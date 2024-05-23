@@ -12,13 +12,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class ApplicationApplicationExtensions
 {
-    public static IApplicationBuilder MapApiEndpoints(
+    public static IApplicationBuilder MapEndpoints(
         this WebApplication app,
         RouteGroupBuilder routeGroupBuilder = null)
     {
         EnsureArg.IsNotNull(app, nameof(app));
 
-        var endpoints = app.Services.GetService<IEnumerable<IApiEndpoints>>();
+        var endpoints = app.Services.GetService<IEnumerable<IEndpoints>>();
         IEndpointRouteBuilder builder = routeGroupBuilder is null ? app : routeGroupBuilder;
 
         foreach (var endpoint in endpoints.SafeNull()

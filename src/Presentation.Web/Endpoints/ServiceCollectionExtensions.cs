@@ -15,46 +15,78 @@ public static partial class ServiceCollectionExtensions
 {
     private const string LogKey = "REQ";
 
-    public static IServiceCollection AddApiEndpoints(
-        this IServiceCollection services)
+    public static IServiceCollection AddEndpoints(
+        this IServiceCollection services,
+        bool enabled = true)
     {
         EnsureArg.IsNotNull(services, nameof(services));
 
-        return services.AddApiEndpoints(
+        return services.AddEndpoints(
             BridgingIT.DevKit.Common.AssemblyExtensions
-                .SafeGetTypes<IApiEndpoints>(AppDomain.CurrentDomain.GetAssemblies())
-                    .Select(t => t.Assembly).Distinct());
+                .SafeGetTypes<IEndpoints>(AppDomain.CurrentDomain.GetAssemblies())
+                    .Select(t => t.Assembly).Distinct(), enabled);
     }
 
-    public static IServiceCollection AddApiEndpoints<T>(
-        this IServiceCollection services)
-        where T : IApiEndpoints
-    {
-        EnsureArg.IsNotNull(services, nameof(services));
-
-        return services.AddApiEndpoints(new[] { typeof(T).Assembly });
-    }
-
-    public static IServiceCollection AddApiEndpoints(
+    public static IServiceCollection AddEndpoints(
         this IServiceCollection services,
-        Assembly assembly)
+        IEndpoints endpoints,
+        bool enabled = true)
     {
         EnsureArg.IsNotNull(services, nameof(services));
+        EnsureArg.IsNotNull(endpoints, nameof(endpoints));
 
-        return services.AddApiEndpoints(new[] { assembly });
+        return services.AddEndpoints(new[] { endpoints }, enabled);
     }
 
-    public static IServiceCollection AddApiEndpoints(
+    public static IServiceCollection AddEndpoints<T>(
         this IServiceCollection services,
-        IEnumerable<Assembly> assemblies)
+        bool enabled = true)
+        where T : IEndpoints
     {
         EnsureArg.IsNotNull(services, nameof(services));
 
-        foreach (var assembly in assemblies.SafeNull())
+        return services.AddEndpoints(new[] { typeof(T) }, enabled);
+    }
+
+    public static IServiceCollection AddEndpoints(
+        this IServiceCollection services,
+        IEnumerable<IEndpoints> endpoints,
+        bool enabled = true)
+    {
+        EnsureArg.IsNotNull(services, nameof(services));
+
+        if (endpoints.SafeAny() && enabled)
         {
-            var serviceDescriptors = assembly.SafeGetTypes<IApiEndpoints>()
+            var serviceDescriptors = endpoints
+                .Select(e => new ServiceDescriptor(typeof(IEndpoints), e))
+                .ToArray();
+
+            if (serviceDescriptors.SafeAny())
+            {
+                services.TryAddEnumerable(serviceDescriptors);
+
+                foreach (var serviceDescriptor in serviceDescriptors)
+                {
+                    Log.Logger.Information("{LogKey} api endpoints added (type={ApiEndpointsType})", LogKey, serviceDescriptor.ImplementationInstance.GetType().Name);
+                }
+            }
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AddEndpoints(
+        this IServiceCollection services,
+        IEnumerable<Type> types,
+        bool enabled = true)
+    {
+        EnsureArg.IsNotNull(services, nameof(services));
+
+        if (types.SafeAny() && enabled)
+        {
+            var serviceDescriptors = types
                 .Where(t => t.IsClass && !t.IsAbstract)
-                .Select(t => ServiceDescriptor.Transient(typeof(IApiEndpoints), t))
+                .Select(t => ServiceDescriptor.Singleton(typeof(IEndpoints), t))
                 .ToArray();
 
             if (serviceDescriptors.SafeAny())
@@ -64,6 +96,49 @@ public static partial class ServiceCollectionExtensions
                 foreach (var serviceDescriptor in serviceDescriptors)
                 {
                     Log.Logger.Information("{LogKey} api endpoints added (type={ApiEndpointsType})", LogKey, serviceDescriptor.ImplementationType.Name);
+                }
+            }
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AddEndpoints(
+        this IServiceCollection services,
+        Assembly assembly,
+        bool enabled = true)
+    {
+        EnsureArg.IsNotNull(services, nameof(services));
+
+        return services.AddEndpoints(new[] { assembly }, enabled);
+    }
+
+    public static IServiceCollection AddEndpoints(
+        this IServiceCollection services,
+        IEnumerable<Assembly> assemblies,
+        bool enabled = true)
+    {
+        EnsureArg.IsNotNull(services, nameof(services));
+
+        if (!enabled)
+        {
+            return services;
+        }
+
+        foreach (var assembly in assemblies.SafeNull())
+        {
+            var serviceDescriptors = assembly.SafeGetTypes<IEndpoints>()
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .Select(t => ServiceDescriptor.Singleton(typeof(IEndpoints), t))
+                .ToArray();
+
+            if (serviceDescriptors.SafeAny())
+            {
+                services.TryAddEnumerable(serviceDescriptors);
+
+                foreach (var serviceDescriptor in serviceDescriptors)
+                {
+                    Log.Logger.Information("{LogKey} endpoints added (type={EndpointsType})", LogKey, serviceDescriptor.ImplementationType.Name);
                 }
             }
         }
