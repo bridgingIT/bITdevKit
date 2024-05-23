@@ -1691,7 +1691,7 @@
           "Ensure.That": "[10.1.0, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[8.0.5, )",
           "Microsoft.IdentityModel.JsonWebTokens": "[7.5.2, )",
-          "Microsoft.NET.Test.Sdk": "[17.9.0, )",
+          "Microsoft.NET.Test.Sdk": "[17.10.0, )",
           "NBuilder": "[6.1.0, )",
           "NSubstitute": "[5.1.0, )",
           "Shouldly": "[4.2.1, )",
