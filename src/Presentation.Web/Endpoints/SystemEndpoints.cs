@@ -18,17 +18,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using IResult = Microsoft.AspNetCore.Http.IResult;
 
-public class SystemEndpoints : EndpointsBase
+public class SystemEndpoints(SystemEndpointsOptions options = null) : EndpointsBase
 {
-    private readonly SystemEndpointsOptions options;
-
-    public SystemEndpoints(SystemEndpointsOptions options = null)
-    {
-        this.options = options ?? new SystemEndpointsOptions();
-    }
+    private readonly SystemEndpointsOptions options = options ?? new SystemEndpointsOptions();
 
     public override void Map(IEndpointRouteBuilder app)
     {
+        if (!this.options.Enabled)
+        {
+            return;
+        }
+
         var group = app.MapGroup(this.options.GroupPrefix)
             .WithTags(this.options.GroupTag);
 
@@ -37,20 +37,56 @@ public class SystemEndpoints : EndpointsBase
             group.RequireAuthorization();
         }
 
-        group.MapGet("echo", this.GetEcho)
-            //.AllowAnonymous()
-            .Produces<string>(200)
-            .Produces<ProblemDetails>(500);
+        group.MapGet(string.Empty, this.GetSystem)
+                //.AllowAnonymous()
+                .Produces<Dictionary<string, string>>(200)
+                .Produces<ProblemDetails>(500);
 
-        group.MapGet("info", this.GetInfo)
-            //.AllowAnonymous()
-            .Produces<SystemInfo>(200)
-            .Produces<ProblemDetails>(500);
+        if (this.options.EchoEnabled)
+        {
+            group.MapGet("echo", this.GetEcho)
+                //.AllowAnonymous()
+                .Produces<string>(200)
+                .Produces<ProblemDetails>(500);
+        }
 
-        group.MapGet("modules", this.GetModules)
-            //.AllowAnonymous()
-            .Produces<IEnumerable<IModule>>(200)
-            .Produces<ProblemDetails>(500);
+        if (this.options.InfoEnabled)
+        {
+            group.MapGet("info", this.GetInfo)
+                //.AllowAnonymous()
+                .Produces<SystemInfo>(200)
+                .Produces<ProblemDetails>(500);
+        }
+
+        if (this.options.ModulesEnabled)
+        {
+            group.MapGet("modules", this.GetModules)
+                //.AllowAnonymous()
+                .Produces<IEnumerable<IModule>>(200)
+                .Produces<ProblemDetails>(500);
+        }
+    }
+
+    public IResult GetSystem(HttpContext httpContext)
+    {
+        var result = new Dictionary<string, string>();
+        var host = $"{httpContext.Request.Scheme}://{httpContext.Request.Host.Value.Trim('/')}";
+        if (this.options.EchoEnabled)
+        {
+            result.Add("echo", $"{host}/{this.options.GroupPrefix.Trim('/')}/echo");
+        }
+
+        if (this.options.InfoEnabled)
+        {
+            result.Add("info", $"{host}/{this.options.GroupPrefix.Trim('/')}/info");
+        }
+
+        if (this.options.ModulesEnabled)
+        {
+            result.Add("modules", $"{host}/{this.options.GroupPrefix.Trim('/')}/modules");
+        }
+
+        return Results.Ok(result);
     }
 
     public async Task<IResult> GetEcho(IMediator mediator, HttpContext httpContext)

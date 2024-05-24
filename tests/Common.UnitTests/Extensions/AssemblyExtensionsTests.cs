@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using BridgingIT.DevKit.Common;
-using Iced.Intel;
 
 public class AssemblyExtensionsTests
 {

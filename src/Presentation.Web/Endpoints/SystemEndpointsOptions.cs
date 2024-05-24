@@ -12,13 +12,10 @@ public class SystemEndpointsOptions : EndpointsOptionsBase
         this.GroupPrefix = "/api/_system";
         this.GroupTag = "_system";
     }
-}
 
-public abstract class EndpointsOptionsBase
-{
-    public string GroupPrefix { get; set; } = "/api";
+    public bool EchoEnabled { get; set; } = false;
 
-    public string GroupTag { get; set; } = string.Empty;
+    public bool InfoEnabled { get; set; } = true;
 
-    public bool RequireAuthorization { get; set; }
+    public bool ModulesEnabled { get; set; } = true;
 }
