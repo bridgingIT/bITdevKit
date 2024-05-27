@@ -13,6 +13,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+[DisallowConcurrentExecution]
+[PersistJobDataAfterExecution]
 public abstract partial class JobBase : IJob
 {
     private const string JobIdKey = "JobId";
@@ -26,7 +28,7 @@ public abstract partial class JobBase : IJob
 
     public ILogger Logger { get; }
 
-    public DateTime LastExecuted { get; set; }
+    public DateTime LastProcessed { get; set; }
 
     public virtual async Task Execute(IJobExecutionContext context)
     {
@@ -45,15 +47,15 @@ public abstract partial class JobBase : IJob
         {
             TypedLogger.LogProcessing(this.Logger, Constants.LogKey, jobTypeName, jobId);
 
-            if (context.JobDetail.JobDataMap.TryGetDateTime(nameof(this.LastExecuted), out var lastExecuted))
+            if (context.JobDetail.JobDataMap.TryGetDateTime(nameof(this.LastProcessed), out var lastProcessed))
             {
-                this.LastExecuted = lastExecuted;
+                this.LastProcessed = lastProcessed;
             }
 
             await this.Process(context, context.CancellationToken).AnyContext();
 
-            this.LastExecuted = DateTime.UtcNow;
-            context.JobDetail.JobDataMap.Put(nameof(this.LastExecuted), this.LastExecuted);
+            this.LastProcessed = DateTime.UtcNow;
+            context.JobDetail.JobDataMap.Put(nameof(this.LastProcessed), this.LastProcessed);
         }
 
         TypedLogger.LogProcessed(this.Logger, Constants.LogKey, jobTypeName, jobId, watch.GetElapsedMilliseconds());
