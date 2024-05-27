@@ -74,6 +74,7 @@ builder.Services.AddQueries()
 builder.Services.AddJobScheduling(o => o.StartupDelay("00:00:10"), q =>
     {
         q.UseInMemoryStore();
+
         //q.UsePersistentStore(s =>
         //{
         //    s.UseSqlServer(c =>
