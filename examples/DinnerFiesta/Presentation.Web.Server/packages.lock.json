@@ -172,6 +172,16 @@
           "OpenTelemetry.Api.ProviderBuilderExtensions": "1.5.1"
         }
       },
+      "Quartz.Serialization.Json": {
+        "type": "Direct",
+        "requested": "[3.9.0, )",
+        "resolved": "3.9.0",
+        "contentHash": "wQ6W3469lHi/gmWvQQC1XOa8Cgk+bTMOgiSWSVtn4xouyVo154MLf91ROx/hVJiYwmjemkl5+uMEQpUMWWNTwQ==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1",
+          "Quartz": "3.9.0"
+        }
+      },
       "Serilog.AspNetCore": {
         "type": "Direct",
         "requested": "[8.0.1, )",
@@ -2150,6 +2160,7 @@
           "Polly": "[8.4.0, )",
           "Polly.Contrib.Simmy": "[0.3.0, )",
           "Quartz": "[3.9.0, )",
+          "Quartz.Extensions.DependencyInjection": "[3.9.0, )",
           "System.IdentityModel.Tokens.Jwt": "[7.5.2, )",
           "System.Net.Http": "[4.3.4, )",
           "System.Text.Json": "[8.0.3, )",
@@ -3345,6 +3356,18 @@
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1",
           "System.Configuration.ConfigurationManager": "6.0.1"
+        }
+      },
+      "Quartz.Extensions.DependencyInjection": {
+        "type": "CentralTransitive",
+        "requested": "[3.9.0, )",
+        "resolved": "3.9.0",
+        "contentHash": "94wJHZTERdtlIzUhawoE+TiVpTnO5tZUKsqYnIdYJOgorn/DkEmh5o9DJdNEpDc/+T+m2DmTnWqOv7MTcBA3Wg==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "8.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
+          "Microsoft.Extensions.Options": "8.0.0",
+          "Quartz": "3.9.0"
         }
       },
       "Scrutor": {

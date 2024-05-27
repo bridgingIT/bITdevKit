@@ -13,18 +13,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-public class ScopedJobWrapper : JobWrapper
+public class ScopedJobWrapper(
+    IServiceScope scope,
+    IJob innerJob,
+    IEnumerable<IModuleContextAccessor> moduleAccessors) : JobWrapper(null, innerJob, moduleAccessors)
 {
-    private readonly IServiceScope scope;
-
-    public ScopedJobWrapper(
-        IServiceScope scope,
-        IJob innerJob,
-        IEnumerable<IModuleContextAccessor> moduleAccessors)
-        : base(null, innerJob, moduleAccessors)
-    {
-        this.scope = scope;
-    }
+    private readonly IServiceScope scope = scope;
 
     public override async Task Execute(IJobExecutionContext context)
     {

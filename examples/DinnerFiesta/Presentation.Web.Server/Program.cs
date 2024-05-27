@@ -20,6 +20,7 @@ using BridgingIT.DevKit.Presentation.Web;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag;
 using NSwag.AspNetCore;
@@ -29,6 +30,8 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Quartz;
+using Quartz.Impl.AdoJobStore;
 using Serilog;
 
 // ===============================================================================================
@@ -68,7 +71,21 @@ builder.Services.AddQueries()
     .WithBehavior(typeof(RetryQueryBehavior<,>))
     .WithBehavior(typeof(TimeoutQueryBehavior<,>));
 
-builder.Services.AddJobScheduling(o => o.StartupDelay("00:00:10"))
+builder.Services.AddJobScheduling(o => o.StartupDelay("00:00:10"), q =>
+    {
+        q.UseInMemoryStore();
+        //q.UsePersistentStore(s =>
+        //{
+        //    s.UseSqlServer(c =>
+        //    {
+        //        c.ConnectionString = builder.Configuration.GetValue<string>("Modules:Core:ConnectionStrings:Default");
+        //        c.TablePrefix = "[quartz].QRTZ_";
+        //        // needs sql script https://github.com/quartznet/quartznet/blob/main/database/tables/tables_sqlServer.sql
+        //        // https://gist.github.com/vip32/47009fb557ae860e1cd5fb4ffcb6ee5c
+        //    });
+        //    s.UseNewtonsoftJsonSerializer();
+        //});
+    })
     .WithBehavior<ModuleScopeJobSchedulingBehavior>()
     //.WithBehavior<ChaosExceptionJobSchedulingBehavior>()
     .WithBehavior<RetryJobSchedulingBehavior>()
@@ -196,14 +213,14 @@ void ConfigureHealth(IServiceCollection services)
 {
     services.AddHealthChecks()
         .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "self" });
-        //.AddSeqPublisher(s => s.Endpoint = builder.Configuration["Serilog:SeqServerUrl"]); // TODO: url configuration does not work like this
-        //.AddCheck<RandomHealthCheck>("random")
-        //.AddAp/plicationInsightsPublisher()
+    //.AddSeqPublisher(s => s.Endpoint = builder.Configuration["Serilog:SeqServerUrl"]); // TODO: url configuration does not work like this
+    //.AddCheck<RandomHealthCheck>("random")
+    //.AddAp/plicationInsightsPublisher()
 
     ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
     services.AddHealthChecksUI() // https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/blob/master/README.md
         .AddInMemoryStorage();
-        //.AddSqliteStorage($"Data Source=data_health.db");
+    //.AddSqliteStorage($"Data Source=data_health.db");
 }
 
 void ConfigureMetrics(MeterProviderBuilder provider)

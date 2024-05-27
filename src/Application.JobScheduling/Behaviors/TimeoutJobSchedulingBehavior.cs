@@ -13,13 +13,8 @@ using Quartz;
 using Humanizer;
 using Polly.Timeout;
 
-public class TimeoutJobSchedulingBehavior : JobSchedulingBehaviorBase
+public class TimeoutJobSchedulingBehavior(ILoggerFactory loggerFactory) : JobSchedulingBehaviorBase(loggerFactory)
 {
-    public TimeoutJobSchedulingBehavior(ILoggerFactory loggerFactory)
-        : base(loggerFactory)
-    {
-    }
-
     public override async Task Execute(IJobExecutionContext context, JobDelegate next)
     {
         var options = ((context.JobInstance as JobWrapper)?.InnerJob as ITimeoutJobScheduling)?.Options;

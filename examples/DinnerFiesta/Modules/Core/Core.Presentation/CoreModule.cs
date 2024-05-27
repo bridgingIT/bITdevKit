@@ -21,6 +21,7 @@ using BridgingIT.DevKit.Examples.DinnerFiesta.Modules.Core.Application.Jobs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Routing;
+using BridgingIT.DevKit.Application.JobScheduling;
 
 public class CoreModule : WebModuleBase
 {
@@ -29,7 +30,8 @@ public class CoreModule : WebModuleBase
         var moduleConfiguration = this.Configure<CoreModuleConfiguration, CoreModuleConfiguration.Validator>(services, configuration);
 
         services.AddJobScheduling()
-            .WithJob<EchoMessageJob>(CronExpressions.Every5Minutes)
+            .WithJob<EchoJob>(CronExpressions.EveryMinute) // .WithSingletonJob<EchoJob>(CronExpressions.Every5Minutes)
+            .WithJob<EchoMessageJob>(CronExpressions.Every10Minutes)
             .WithJob<DinnerSnapshotExportJob>(CronExpressions.EveryHour);
             //.WithJob<HealthCheckJob>(CronExpressions.EveryMinute);
 

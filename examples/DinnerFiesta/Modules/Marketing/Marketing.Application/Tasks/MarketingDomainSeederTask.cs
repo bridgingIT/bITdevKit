@@ -30,8 +30,6 @@ public class MarketingDomainSeederTask(
         {
             if (!await repository.ExistsAsync(entity.Id))
             {
-                entity.AuditState.SetCreated("seed");
-
                 await repository.InsertAsync(entity);
             }
         }

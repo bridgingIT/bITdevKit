@@ -10,17 +10,11 @@ using Microsoft.Extensions.Logging;
 using Quartz;
 using System.Diagnostics;
 
-public class ModuleScopeJobSchedulingBehavior : JobSchedulingBehaviorBase
+public class ModuleScopeJobSchedulingBehavior(
+    ILoggerFactory loggerFactory,
+    IEnumerable<ActivitySource> activitySources = null) : JobSchedulingBehaviorBase(loggerFactory)
 {
-    private readonly IEnumerable<ActivitySource> activitySources;
-
-    public ModuleScopeJobSchedulingBehavior(
-        ILoggerFactory loggerFactory,
-        IEnumerable<ActivitySource> activitySources = null)
-        : base(loggerFactory)
-    {
-        this.activitySources = activitySources;
-    }
+    private readonly IEnumerable<ActivitySource> activitySources = activitySources;
 
     public override async Task Execute(IJobExecutionContext context, JobDelegate next)
     {

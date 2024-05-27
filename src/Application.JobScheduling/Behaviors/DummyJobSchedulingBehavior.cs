@@ -9,14 +9,9 @@ using BridgingIT.DevKit.Common;
 using Microsoft.Extensions.Logging;
 using Quartz;
 
-public class DummyJobSchedulingBehavior : JobSchedulingBehaviorBase
+public class DummyJobSchedulingBehavior(ILoggerFactory loggerFactory) : JobSchedulingBehaviorBase(loggerFactory)
 {
     private const string JobIdKey = "JobId";
-
-    public DummyJobSchedulingBehavior(ILoggerFactory loggerFactory)
-        : base(loggerFactory)
-    {
-    }
 
     public override async Task Execute(IJobExecutionContext context, JobDelegate next)
     {

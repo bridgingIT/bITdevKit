@@ -13,27 +13,20 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-public class JobWrapper : IJob, IDisposable
+public class JobWrapper(
+    IServiceProvider serviceProvider,
+    IJob innerJob,
+    IEnumerable<IModuleContextAccessor> moduleAccessors) : IJob, IDisposable
 {
     private const string CorrelationKey = "CorrelationId";
     private const string FlowKey = "FlowId";
     private const string JobIdKey = "JobId";
     private const string JobTypeKey = "JobType";
-    private readonly IServiceProvider serviceProvider;
+    private readonly IServiceProvider serviceProvider = serviceProvider;
 
-    public JobWrapper(
-        IServiceProvider serviceProvider,
-        IJob innerJob,
-        IEnumerable<IModuleContextAccessor> moduleAccessors)
-    {
-        this.serviceProvider = serviceProvider;
-        this.InnerJob = innerJob;
-        this.ModuleAccessors = moduleAccessors;
-    }
+    public IJob InnerJob { get; set; } = innerJob;
 
-    public IJob InnerJob { get; set; }
-
-    public IEnumerable<IModuleContextAccessor> ModuleAccessors { get; set; }
+    public IEnumerable<IModuleContextAccessor> ModuleAccessors { get; set; } = moduleAccessors;
 
     public virtual async Task Execute(IJobExecutionContext context)
     {

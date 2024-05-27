@@ -13,13 +13,8 @@ using Quartz;
 using Humanizer;
 using System.Diagnostics;
 
-public class RetryJobSchedulingBehavior : JobSchedulingBehaviorBase
+public class RetryJobSchedulingBehavior(ILoggerFactory loggerFactory) : JobSchedulingBehaviorBase(loggerFactory)
 {
-    public RetryJobSchedulingBehavior(ILoggerFactory loggerFactory)
-        : base(loggerFactory)
-    {
-    }
-
     public override async Task Execute(IJobExecutionContext context, JobDelegate next)
     {
         var options = ((context.JobInstance as JobWrapper)?.InnerJob as IRetryJobScheduling)?.Options;
