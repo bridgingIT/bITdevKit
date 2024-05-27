@@ -22,9 +22,7 @@ public class EchoJob(ILoggerFactory loggerFactory) : JobBase(loggerFactory),
 
     public override async Task Process(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
-        context.JobDetail.JobDataMap.TryGetDateTime("lastExecution", out var lastExecution);
-        this.Logger.LogInformation("{LogKey} echo (jobKey={JobKey}, lastExecution={JobLastExecution})", Constants.LogKey, context.JobDetail.Key, lastExecution);
-        context.JobDetail.JobDataMap.Put("lastExecution", DateTimeOffset.UtcNow);
+        this.Logger.LogInformation("{LogKey} echo (jobKey={JobKey}, lastExecuted={JobLastExecuted})", Constants.LogKey, context.JobDetail.Key, this.LastExecuted);
 
         await Task.Delay(5000, cancellationToken);
     }

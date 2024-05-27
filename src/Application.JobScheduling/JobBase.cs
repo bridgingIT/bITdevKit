@@ -9,6 +9,7 @@ using BridgingIT.DevKit.Common;
 using EnsureThat;
 using Microsoft.Extensions.Logging;
 using Quartz;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,6 +25,8 @@ public abstract partial class JobBase : IJob
     }
 
     public ILogger Logger { get; }
+
+    public DateTime LastExecuted { get; set; }
 
     public virtual async Task Execute(IJobExecutionContext context)
     {
@@ -41,7 +44,16 @@ public abstract partial class JobBase : IJob
         else
         {
             TypedLogger.LogProcessing(this.Logger, Constants.LogKey, jobTypeName, jobId);
+
+            if (context.JobDetail.JobDataMap.TryGetDateTime(nameof(this.LastExecuted), out var lastExecuted))
+            {
+                this.LastExecuted = lastExecuted;
+            }
+
             await this.Process(context, context.CancellationToken).AnyContext();
+
+            this.LastExecuted = DateTime.UtcNow;
+            context.JobDetail.JobDataMap.Put(nameof(this.LastExecuted), this.LastExecuted);
         }
 
         TypedLogger.LogProcessed(this.Logger, Constants.LogKey, jobTypeName, jobId, watch.GetElapsedMilliseconds());
