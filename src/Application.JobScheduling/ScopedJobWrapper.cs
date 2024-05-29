@@ -46,6 +46,13 @@ public class ScopedJobWrapper(
                 context.Put("ModuleContextAccessors", this.ModuleAccessors);
                 context.Put(Constants.CorrelationIdKey, correlationId);
                 context.Put(Constants.FlowIdKey, flowId);
+                context.Trigger.JobDataMap.TryGetString(Constants.TriggeredByKey, out var triggeredBy);
+                context.Put(Constants.TriggeredByKey, triggeredBy.EmptyToNull() ?? context.Scheduler.SchedulerName);
+
+                //context.JobDetail.JobDataMap.Put(Constants.TriggeredByKey, "schedule");
+                //context.JobDetail.JobDataMap.Put(Constants.CorrelationIdKey, correlationId);
+                //context.JobDetail.JobDataMap.Put(Constants.FlowIdKey, flowId);
+
                 await this.ExecutePipeline(context, behaviors);
             }
             catch (Exception ex)

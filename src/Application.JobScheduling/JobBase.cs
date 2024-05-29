@@ -28,13 +28,13 @@ public abstract partial class JobBase : IJob
 
     public ILogger Logger { get; }
 
-    public DateTimeOffset LastProcessedDate { get; set; }
+    public DateTimeOffset ProcessedDate { get; set; }
 
-    public long LastElapsedMilliseconds { get; set; }
+    public long ElapsedMilliseconds { get; set; }
 
-    public JobStatus LastStatus { get; set; }
+    public JobStatus Status { get; set; }
 
-    public string LastErrorMessage { get; set; }
+    public string ErrorMessage { get; set; }
 
     public virtual async Task Execute(IJobExecutionContext context)
     {
@@ -78,39 +78,42 @@ public abstract partial class JobBase : IJob
 
         void GetJobProperties(IJobExecutionContext context)
         {
-            if (context.JobDetail.JobDataMap.TryGetString(nameof(this.LastStatus), out var lastStatus))
+            if (context.JobDetail.JobDataMap.TryGetString(nameof(this.Status), out var status))
             {
-                Enum.TryParse(lastStatus, out JobStatus status);
-                this.LastStatus = status;
+                Enum.TryParse(status, out JobStatus s);
+                this.Status = s;
             }
 
-            if (context.JobDetail.JobDataMap.TryGetString(nameof(this.LastErrorMessage), out var lastErrorMessage))
+            if (context.JobDetail.JobDataMap.TryGetString(nameof(this.ErrorMessage), out var errorMessage))
             {
-                this.LastErrorMessage = lastErrorMessage;
+                this.ErrorMessage = errorMessage;
             }
 
-            if (context.JobDetail.JobDataMap.TryGetDateTimeOffset(nameof(this.LastProcessedDate), out var lastProcessed))
+            if (context.JobDetail.JobDataMap.TryGetDateTimeOffset(nameof(this.ProcessedDate), out var processed))
             {
-                this.LastProcessedDate = lastProcessed;
+                this.ProcessedDate = processed;
             }
 
-            if (context.JobDetail.JobDataMap.TryGetLong(nameof(this.LastElapsedMilliseconds), out var lastElapsed))
+            if (context.JobDetail.JobDataMap.TryGetLong(nameof(this.ElapsedMilliseconds), out var elapsed))
             {
-                this.LastElapsedMilliseconds = lastElapsed;
+                this.ElapsedMilliseconds = elapsed;
             }
         }
 
         void PutJobProperties(IJobExecutionContext context, JobStatus status, string errorMessage, long elapsedMilliseconds)
         {
-            this.LastStatus = status;
-            this.LastErrorMessage = errorMessage;
-            this.LastProcessedDate = DateTimeOffset.UtcNow;
-            this.LastElapsedMilliseconds = elapsedMilliseconds;
+            this.Status = status;
+            this.ErrorMessage = errorMessage;
+            this.ProcessedDate = DateTimeOffset.UtcNow;
+            this.ElapsedMilliseconds = elapsedMilliseconds;
 
-            context.JobDetail.JobDataMap.Put(nameof(this.LastStatus), this.LastStatus.ToString());
-            context.JobDetail.JobDataMap.Put(nameof(this.LastErrorMessage), this.LastErrorMessage);
-            context.JobDetail.JobDataMap.Put(nameof(this.LastProcessedDate), this.LastProcessedDate);
-            context.JobDetail.JobDataMap.Put(nameof(this.LastElapsedMilliseconds), this.LastElapsedMilliseconds);
+            context.JobDetail.JobDataMap.Put(Constants.CorrelationIdKey, context.Get(Constants.CorrelationIdKey));
+            context.JobDetail.JobDataMap.Put(Constants.FlowIdKey, context.Get(Constants.FlowIdKey));
+            context.JobDetail.JobDataMap.Put(Constants.TriggeredByKey, context.Get(Constants.TriggeredByKey));
+            context.JobDetail.JobDataMap.Put(nameof(this.Status), this.Status.ToString());
+            context.JobDetail.JobDataMap.Put(nameof(this.ErrorMessage), this.ErrorMessage);
+            context.JobDetail.JobDataMap.Put(nameof(this.ProcessedDate), this.ProcessedDate);
+            context.JobDetail.JobDataMap.Put(nameof(this.ElapsedMilliseconds), this.ElapsedMilliseconds);
         }
     }
 
@@ -124,11 +127,4 @@ public abstract partial class JobBase : IJob
         [LoggerMessage(1, LogLevel.Information, "{LogKey} processed (type={JobType}, id={JobId}) -> took {TimeElapsed:0.0000} ms")]
         public static partial void LogProcessed(ILogger logger, string logKey, string jobType, string jobId, long timeElapsed);
     }
-}
-
-public enum JobStatus
-{
-    Unknown = 0,
-    Success = 1,
-    Fail = 2
 }

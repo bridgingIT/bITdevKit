@@ -70,8 +70,8 @@ public static class ServiceCollectionExtensions
             services.Configure<QuartzOptions>(configuration.GetSection("JobScheduling:Quartz"));
         }
 
-        services.AddQuartz(properties, configure); // https://github.com/quartznet/quartznet/blob/main/src/Quartz/Configuration/ServiceCollectionExtensions.cs#L31
         services.TryAddSingleton<IJobFactory, ScopedJobFactory>();
+        services.AddQuartz(properties, configure); // https://github.com/quartznet/quartznet/blob/main/src/Quartz/Configuration/ServiceCollectionExtensions.cs#L31
 
         services.AddHostedService(sp =>
             new JobSchedulingService( // QuartzHostedService https://github.com/quartznet/quartznet/blob/main/src/Quartz/Hosting/QuartzHostedService.cs#L21

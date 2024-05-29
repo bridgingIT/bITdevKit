@@ -7,8 +7,10 @@ namespace BridgingIT.DevKit.Presentation.Web.JobScheduling;
 
 using System.Net;
 using System.Threading;
+using BridgingIT.DevKit.Application.JobScheduling;
 using BridgingIT.DevKit.Common;
 using BridgingIT.DevKit.Presentation.Web;
+using Humanizer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -61,7 +63,11 @@ public class JobSchedulingEndpoints(
             return Results.NotFound();
         }
 
-        await scheduler.TriggerJob(new JobKey(name), cancellationToken);
+        var data = new JobDataMap
+        {
+            [Constants.TriggeredByKey] = nameof(JobSchedulingEndpoints) // or CurrentUserService
+        };
+        await scheduler.TriggerJob(new JobKey(name), data, cancellationToken);
         await Task.Delay(300, cancellationToken);
         var job = (await this.GetAllJobs(scheduler, cancellationToken))?.FirstOrDefault(j => j.Name == name);
 
