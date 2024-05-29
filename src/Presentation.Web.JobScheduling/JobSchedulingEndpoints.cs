@@ -84,6 +84,7 @@ public class JobSchedulingEndpoints(
             {
                 var job = await scheduler.GetJobDetail(jobKey, cancellationToken);
                 var triggers = await scheduler.GetTriggersOfJob(jobKey, cancellationToken);
+                var props = job.JobDataMap.ToDictionary();
 
                 foreach (var trigger in triggers.SafeNull())
                 {
@@ -99,7 +100,10 @@ public class JobSchedulingEndpoints(
                         TriggerState = (await scheduler.GetTriggerState(trigger.Key, cancellationToken)).ToString(),
                         NextFireTime = trigger.GetNextFireTimeUtc(),
                         PreviousFireTime = trigger.GetPreviousFireTimeUtc(),
-                        CurrentlyExecuting = executingJobs.SafeWhere(j => j.JobDetail.Key.Name == job.Key.Name).SafeAny()
+                        CurrentlyExecuting = executingJobs.SafeWhere(j => j.JobDetail.Key.Name == job.Key.Name).SafeAny(),
+#pragma warning disable SA1010 // Opening square brackets should be spaced correctly
+                        Properties = job.JobDataMap?.ToDictionary() ?? []
+#pragma warning restore SA1010 // Opening square brackets should be spaced correctly
                     };
                     results.Add(jobInfo);
                 }

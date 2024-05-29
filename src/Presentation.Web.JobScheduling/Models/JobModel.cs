@@ -1,5 +1,7 @@
 ﻿namespace BridgingIT.DevKit.Presentation.Web.JobScheduling;
 
+using System.Collections.Generic;
+
 public class JobModel
 {
     public string Group { get; set; }
@@ -23,4 +25,6 @@ public class JobModel
     public DateTimeOffset? PreviousFireTime { get; set; }
 
     public bool CurrentlyExecuting { get; set; }
+
+    public Dictionary<string, object> Properties { get; set; }
 }

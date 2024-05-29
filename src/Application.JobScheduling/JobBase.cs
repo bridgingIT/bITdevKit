@@ -28,9 +28,9 @@ public abstract partial class JobBase : IJob
 
     public ILogger Logger { get; }
 
-    public DateTime LastProcessed { get; set; }
+    public DateTimeOffset LastProcessedDate { get; set; }
 
-    public long LastDuration { get; set; }
+    public long LastElapsedMilliseconds { get; set; }
 
     public JobStatus LastStatus { get; set; }
 
@@ -62,7 +62,7 @@ public abstract partial class JobBase : IJob
             }
             catch (Exception ex)
             {
-                PutJobProperties(context, JobStatus.Fail, ex.Message, watch.GetElapsedMilliseconds());
+                PutJobProperties(context, JobStatus.Fail, $"[{ex.GetType().Name}] {ex.Message}", watch.GetElapsedMilliseconds());
 
                 throw;
             }
@@ -89,14 +89,14 @@ public abstract partial class JobBase : IJob
                 this.LastErrorMessage = lastErrorMessage;
             }
 
-            if (context.JobDetail.JobDataMap.TryGetDateTime(nameof(this.LastProcessed), out var lastProcessed))
+            if (context.JobDetail.JobDataMap.TryGetDateTimeOffset(nameof(this.LastProcessedDate), out var lastProcessed))
             {
-                this.LastProcessed = lastProcessed;
+                this.LastProcessedDate = lastProcessed;
             }
 
-            if (context.JobDetail.JobDataMap.TryGetLong(nameof(this.LastDuration), out var lastDuration))
+            if (context.JobDetail.JobDataMap.TryGetLong(nameof(this.LastElapsedMilliseconds), out var lastElapsed))
             {
-                this.LastDuration = lastDuration;
+                this.LastElapsedMilliseconds = lastElapsed;
             }
         }
 
@@ -104,13 +104,13 @@ public abstract partial class JobBase : IJob
         {
             this.LastStatus = status;
             this.LastErrorMessage = errorMessage;
-            this.LastProcessed = DateTime.UtcNow;
-            this.LastDuration = elapsedMilliseconds;
+            this.LastProcessedDate = DateTimeOffset.UtcNow;
+            this.LastElapsedMilliseconds = elapsedMilliseconds;
 
             context.JobDetail.JobDataMap.Put(nameof(this.LastStatus), this.LastStatus.ToString());
             context.JobDetail.JobDataMap.Put(nameof(this.LastErrorMessage), this.LastErrorMessage);
-            context.JobDetail.JobDataMap.Put(nameof(this.LastProcessed), this.LastProcessed);
-            context.JobDetail.JobDataMap.Put(nameof(this.LastDuration), this.LastDuration);
+            context.JobDetail.JobDataMap.Put(nameof(this.LastProcessedDate), this.LastProcessedDate);
+            context.JobDetail.JobDataMap.Put(nameof(this.LastElapsedMilliseconds), this.LastElapsedMilliseconds);
         }
     }
 

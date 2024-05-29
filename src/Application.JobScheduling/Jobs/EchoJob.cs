@@ -20,7 +20,7 @@ public class EchoJob(ILoggerFactory loggerFactory) : JobBase(loggerFactory),
 
     public override async Task Process(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
-        this.Logger.LogInformation("{LogKey} echo (jobKey={JobKey}, lastProcessed={LastProcessed})", Constants.LogKey, context.JobDetail.Key, this.LastProcessed);
+        this.Logger.LogInformation("{LogKey} echo (jobKey={JobKey}, lastProcessed={LastProcessed})", Constants.LogKey, context.JobDetail.Key, this.LastProcessedDate);
 
         await Task.Delay(5000, cancellationToken);
     }
