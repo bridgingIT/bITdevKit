@@ -69,7 +69,7 @@ public class JobSchedulingEndpoints(
             [Constants.TriggeredByKey] = nameof(JobSchedulingEndpoints) // or CurrentUserService
         };
         await scheduler.TriggerJob(new JobKey(name), data, cancellationToken);
-        await Task.Delay(300, cancellationToken);
+        await Task.Delay(300, cancellationToken); // TODO: job properties are only available after job has finished
         var job = (await this.GetAllJobs(scheduler, cancellationToken))?.FirstOrDefault(j => j.Name == name);
 
         return Results.Accepted(null, job);
