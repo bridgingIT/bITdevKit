@@ -30,6 +30,12 @@ public abstract partial class JobBase : IJob
 
     public DateTime LastProcessed { get; set; }
 
+    public long LastDuration { get; set; }
+
+    public JobStatus LastStatus { get; set; }
+
+    public string LastErrorMessage { get; set; }
+
     public virtual async Task Execute(IJobExecutionContext context)
     {
         EnsureArg.IsNotNull(context, nameof(context));
@@ -37,6 +43,7 @@ public abstract partial class JobBase : IJob
         var jobId = context.JobDetail.JobDataMap?.GetString(JobIdKey) ?? context.FireInstanceId;
         var jobTypeName = context.JobDetail.JobType.Name;
         var watch = ValueStopwatch.StartNew();
+        long elapsedMilliseconds = 0;
 
         if (context.CancellationToken.IsCancellationRequested)
         {
@@ -47,18 +54,64 @@ public abstract partial class JobBase : IJob
         {
             TypedLogger.LogProcessing(this.Logger, Constants.LogKey, jobTypeName, jobId);
 
+            GetJobProperties(context);
+
+            try
+            {
+                await this.Process(context, context.CancellationToken).AnyContext();
+            }
+            catch (Exception ex)
+            {
+                PutJobProperties(context, JobStatus.Fail, ex.Message, watch.GetElapsedMilliseconds());
+
+                throw;
+            }
+            finally
+            {
+                elapsedMilliseconds = watch.GetElapsedMilliseconds();
+            }
+
+            PutJobProperties(context, JobStatus.Success, null, elapsedMilliseconds);
+        }
+
+        TypedLogger.LogProcessed(this.Logger, Constants.LogKey, jobTypeName, jobId, elapsedMilliseconds);
+
+        void GetJobProperties(IJobExecutionContext context)
+        {
+            if (context.JobDetail.JobDataMap.TryGetString(nameof(this.LastStatus), out var lastStatus))
+            {
+                Enum.TryParse(lastStatus, out JobStatus status);
+                this.LastStatus = status;
+            }
+
+            if (context.JobDetail.JobDataMap.TryGetString(nameof(this.LastErrorMessage), out var lastErrorMessage))
+            {
+                this.LastErrorMessage = lastErrorMessage;
+            }
+
             if (context.JobDetail.JobDataMap.TryGetDateTime(nameof(this.LastProcessed), out var lastProcessed))
             {
                 this.LastProcessed = lastProcessed;
             }
 
-            await this.Process(context, context.CancellationToken).AnyContext();
-
-            this.LastProcessed = DateTime.UtcNow;
-            context.JobDetail.JobDataMap.Put(nameof(this.LastProcessed), this.LastProcessed);
+            if (context.JobDetail.JobDataMap.TryGetLong(nameof(this.LastDuration), out var lastDuration))
+            {
+                this.LastDuration = lastDuration;
+            }
         }
 
-        TypedLogger.LogProcessed(this.Logger, Constants.LogKey, jobTypeName, jobId, watch.GetElapsedMilliseconds());
+        void PutJobProperties(IJobExecutionContext context, JobStatus status, string errorMessage, long elapsedMilliseconds)
+        {
+            this.LastStatus = status;
+            this.LastErrorMessage = errorMessage;
+            this.LastProcessed = DateTime.UtcNow;
+            this.LastDuration = elapsedMilliseconds;
+
+            context.JobDetail.JobDataMap.Put(nameof(this.LastStatus), this.LastStatus.ToString());
+            context.JobDetail.JobDataMap.Put(nameof(this.LastErrorMessage), this.LastErrorMessage);
+            context.JobDetail.JobDataMap.Put(nameof(this.LastProcessed), this.LastProcessed);
+            context.JobDetail.JobDataMap.Put(nameof(this.LastDuration), this.LastDuration);
+        }
     }
 
     public abstract Task Process(IJobExecutionContext context, CancellationToken cancellationToken = default);
@@ -71,4 +124,11 @@ public abstract partial class JobBase : IJob
         [LoggerMessage(1, LogLevel.Information, "{LogKey} processed (type={JobType}, id={JobId}) -> took {TimeElapsed:0.0000} ms")]
         public static partial void LogProcessed(ILogger logger, string logKey, string jobType, string jobId, long timeElapsed);
     }
+}
+
+public enum JobStatus
+{
+    Unknown = 0,
+    Success = 1,
+    Fail = 2
 }
