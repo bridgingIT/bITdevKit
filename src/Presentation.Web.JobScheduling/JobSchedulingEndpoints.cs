@@ -55,7 +55,7 @@ public class JobSchedulingEndpoints(
                 await this.schedulerFactory.GetScheduler(cancellationToken), cancellationToken));
     }
 
-    private async Task<IResult> PostJob(string name, CancellationToken cancellationToken)
+    private async Task<IResult> PostJob(string name, HttpContext httpContext, CancellationToken cancellationToken)
     {
         var scheduler = await this.schedulerFactory.GetScheduler(cancellationToken);
         if (!(await scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken)).Any(j => j.Name == name))
@@ -65,6 +65,7 @@ public class JobSchedulingEndpoints(
 
         var data = new JobDataMap
         {
+            [Constants.CorrelationIdKey] = httpContext.TryGetCorrelationId(),
             [Constants.TriggeredByKey] = nameof(JobSchedulingEndpoints) // or CurrentUserService
         };
         await scheduler.TriggerJob(new JobKey(name), data, cancellationToken);
