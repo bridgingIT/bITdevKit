@@ -51,6 +51,7 @@
     <ProjectReference Include="..\..\..\src\Presentation.Configuration\Presentation.Configuration.csproj" />
     <ProjectReference Include="..\..\..\src\Presentation.Serilog\Presentation.Serilog.csproj" />
     <ProjectReference Include="..\..\..\src\Presentation.Web.HealthChecks\Presentation.Web.HealthChecks.csproj" />
+    <ProjectReference Include="..\..\..\src\Presentation.Web.JobScheduling\Presentation.Web.JobScheduling.csproj" />
     <ProjectReference Include="..\..\..\src\Presentation.Web\Presentation.Web.csproj" />
     <ProjectReference Include="..\Modules\Core\Core.Presentation\DinnerFiesta.Core.Presentation.csproj" />
     <ProjectReference Include="..\Modules\Marketing\Marketing.Presentation\DinnerFiesta.Marketing.Presentation.csproj" />

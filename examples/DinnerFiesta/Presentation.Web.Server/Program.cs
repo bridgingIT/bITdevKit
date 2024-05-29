@@ -5,6 +5,7 @@
 
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using BridgingIT.DevKit.Application.Commands;
 using BridgingIT.DevKit.Application.JobScheduling;
@@ -17,10 +18,12 @@ using BridgingIT.DevKit.Examples.DinnerFiesta.Modules.Core.Presentation;
 using BridgingIT.DevKit.Examples.DinnerFiesta.Modules.Marketing.Presentation;
 using BridgingIT.DevKit.Presentation;
 using BridgingIT.DevKit.Presentation.Web;
+using BridgingIT.DevKit.Presentation.Web.JobScheduling;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag;
 using NSwag.AspNetCore;
@@ -48,6 +51,8 @@ builder.Services.AddModules(builder.Configuration, builder.Environment)
     .WithModuleContextAccessors()
     .WithRequestModuleContextAccessors()
     .WithModuleControllers(c => c.AddJsonOptions(ConfigureJsonOptions)); // alternative: WithModuleFeatureProvider(c => ...)
+
+builder.Services.Configure<JsonOptions>(ConfigureJsonOptions); // configure json for minimal apis
 
 // ===============================================================================================
 // Configure the services
@@ -131,6 +136,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 
 builder.Services.AddEndpoints<SystemEndpoints>(builder.Environment.IsDevelopment());
+builder.Services.AddEndpoints<JobSchedulingEndpoints>(builder.Environment.IsDevelopment());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(ConfigureOpenApiDocument); // TODO: still needed when all OpenAPI specifications are available in swagger UI?
 
@@ -208,7 +214,9 @@ void ConfiguraApiBehavior(ApiBehaviorOptions options)
 
 void ConfigureJsonOptions(JsonOptions options)
 {
+    options.JsonSerializerOptions.WriteIndented = true;
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 }
 

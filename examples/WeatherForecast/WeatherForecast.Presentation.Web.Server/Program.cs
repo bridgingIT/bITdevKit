@@ -4,6 +4,7 @@
 // found in the LICENSE file at https://github.com/bridgingit/bitdevkit/license
 
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using BridgingIT.DevKit.Application.Commands;
 using BridgingIT.DevKit.Application.JobScheduling;
@@ -38,7 +39,9 @@ builder.Services.AddModules(builder.Configuration)
     .WithModule<CoreModule>()
     .WithModuleContextAccessors()
     .WithRequestModuleContextAccessors()
-    .WithModuleControllers(c => c.AddJsonOptions(ConfiguraJsonOptions));
+    .WithModuleControllers(c => c.AddJsonOptions(ConfigureJsonOptions));
+
+builder.Services.Configure<JsonOptions>(ConfigureJsonOptions); // configure json for minimal apis
 
 // ===============================================================================================
 // Configure the services
@@ -165,9 +168,11 @@ void ConfiguraApiBehavior(ApiBehaviorOptions options)
     options.SuppressModelStateInvalidFilter = true;
 }
 
-void ConfiguraJsonOptions(JsonOptions options)
+void ConfigureJsonOptions(JsonOptions options)
 {
+    options.JsonSerializerOptions.WriteIndented = true;
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 }
 
