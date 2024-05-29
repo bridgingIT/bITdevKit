@@ -87,7 +87,7 @@ jobs:
 
       - name: Report test results # https://octopus.com/blog/githubactions-running-unit-tests
         uses: dorny/test-reporter@v1
-        if: always()
+        # if: always()
         with:
           name: Tests
           path: "**/test-results.trx"
